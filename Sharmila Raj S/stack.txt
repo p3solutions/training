@@ -1,0 +1,19 @@
+package Prgm;
+
+import java.util.Stack;
+
+public class Stackl {
+	public static void main(String[] args) {
+		Stack<Integer>s=new Stack<Integer>();
+		s.push(1);
+		s.push(3);
+		s.push(5);
+		s.push(10);
+		System.out.println(s.pop());
+		System.out.println(s.pop());
+		System.out.println(s.pop());
+		System.out.println(s.pop());
+		
+	}
+
+}
