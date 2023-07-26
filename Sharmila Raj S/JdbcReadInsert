@@ -1,0 +1,63 @@
+package jdbc;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+
+public class Ads {
+	public static void main(String[] args)throws Exception {
+		
+		insertRecord();
+		
+		
+	}
+	public static void readRecords()throws Exception {
+		String url= "jdbc:mysql://localhost:3306/ads";
+		String userName="root";
+		String pwd="root";
+		String query="select * from developers";
+		
+		Connection con = DriverManager.getConnection(url,userName,pwd);
+		Statement st=con.createStatement();
+		ResultSet rs = st.executeQuery(query);
+		
+		while (rs.next()) {
+		System.out.println("Id is:"+rs.getInt(1));
+		System.out.println("Name is:"+rs.getString(2));
+		System.out.println("Salary is:"+rs.getInt(3));
+		}
+		con.close();
+		
+		
+	}
+    
+    
+    public static void insertRecord()throws Exception{
+    	String url= "jdbc:mysql://localhost:3306/ads";
+		String userName="root";
+		String pwd="root";
+		
+		int id=9;
+		String name="Hari";
+		int sal=15000;
+		String query="insert into developers values(?,?,?)";
+		
+		Connection con = DriverManager.getConnection(url,userName,pwd);
+		PreparedStatement ps=con.prepareStatement(query);
+		ps.setInt(1, id);
+		ps.setString(2, name);
+		ps.setInt(3, sal);
+		int rows = ps.executeUpdate();
+		
+		System.out.println("Number of rows Affected:"+rows);
+		con.close();
+		
+	
+		
+	}
+    
+
+}
