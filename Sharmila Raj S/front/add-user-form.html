@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add User</title>
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <link type="text/css" rel="stylesheet" href="css/add-user-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+
+    
+    </style>
+
+</head>
+
+
+
+
+<body>
+    <div id="wrapper">
+        <div id="header">
+            <h2>Add New User</h2>
+        </div>
+    </div>
+
+    <form>
+        <label>UserName:</label>
+        <input type="text" name="userName"><br>
+
+        <label>FirstName:</label>
+        <input type="text" name="firstName"><br>
+
+        <label>LastName:</label>
+        <input type="text" name="lastName"><br>
+
+        <label>Email:</label>
+        <input type="text" name="email"><br>
+
+        <label>Password:</label>
+        <div class="password-field">
+            <input type="password" name="password" id="passwordField">
+            <span class="eye-icon" id="togglePassword">
+                <i class="far fa-eye"></i>
+            </span>
+        </div>
+
+        <label>Confirm Password:</label>
+        <div class="password-field">
+            <input type="password" name="confirm_password" id="confirmPasswordField">
+            <span class="eye-icon" id="Password">
+                <i class="far fa-eye"></i>
+            </span>
+        </div>
+
+        <label>Role/Group</label>
+        <select name="role_group">
+            <option value="superAdmin">D3SIXTY_SUPER_ADMIN</option>
+            <option value="admin">D3SIXTY_ADMIN</option>
+            <option value="technicalContributor">D3SIXTY_TECHNICAL_CONTRIBUTOR</option>
+        </select><br><br>
+         
+
+        <input type="submit" value="Add User" class="add-user" >
+        <button type="button" class="close">Close</button>
+    </form>
+    <div style="clear: both;"></div>
+
+		
+
+    <!-- Include Font Awesome JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        const togglePasswordButton = document.getElementById('togglePassword');
+        const toggleConfirmPasswordButton = document.getElementById('toggleConfirmPassword');
+        const passwordField = document.getElementById('passwordField');
+        const confirmPasswordField = document.getElementById('confirmPasswordField');
+
+        togglePasswordButton.addEventListener('click', () => {
+            togglePasswordFieldVisibility(passwordField, togglePasswordButton);
+        }); 
+
+        toggleConfirmPasswordButton.addEventListener('click', () => {
+            togglePasswordFieldVisibility(confirmPasswordField, toggleConfirmPasswordButton);
+        });
+
+        function togglePasswordFieldVisibility(field, toggleButton) {
+            const isVisible = toggleButton.getAttribute('data-visible') === 'true';
+            field.type = isVisible ? 'password' : 'text';
+            toggleButton.innerHTML = isVisible ? '<i class="far fa-eye"></i>' : '<i class="far fa-eye-slash"></i>';
+            toggleButton.setAttribute('data-visible', !isVisible);
+        }
+    </script>
+</body>
+</html>

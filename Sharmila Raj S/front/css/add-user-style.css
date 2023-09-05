@@ -1,0 +1,75 @@
+form {
+	margin-top: 10px;
+}
+
+label {
+	font-size: 16px; 
+	width: 100px; 
+	display: block; 
+	text-align: right;
+	margin-right: 10px;
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+input {
+	width: 250px;
+	border: 1px solid #666; 
+	border-radius: 5px; 
+	padding: 4px; 
+	font-size: 16px;
+	text-align:left;
+}
+.add-user {
+	font-weight: bold;
+	width: 130px; 
+	padding: 5px 10px; 
+	margin-top: 30px;
+	background: rgb(39, 22, 228);
+}
+
+.close {
+	font-weight: bold;
+	width: 130px; 
+	padding: 5px 10px; 
+	margin-top: 30px;
+	background: #cccccc;
+}
+
+#togglePassword {
+            position: relative;
+            width: 100%;
+            margin-bottom: 5px;
+            padding-right:1px;
+            color: rgb(0, 0, 0);
+            min-width: 25px;
+            text-align:justify;
+        }
+.add-user {
+			bottom:15%;
+			left:3%;
+			width:100px;
+			height:40px;
+			position: relative;
+			z-index: 2;
+			background:blue; 
+			}
+.close{
+	        bottom:15%;
+			left:3%;
+			width:100px;
+			height:40px;
+			position: relative;
+			z-index: 2;
+			background:rgb(190, 186, 186)
+
+}
+
+
+         
+       
+
+
+
+
+
