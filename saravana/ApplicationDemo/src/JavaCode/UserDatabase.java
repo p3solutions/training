@@ -24,62 +24,111 @@ public class UserDatabase {
 	}
 
 	public void AddApplication(Application NewApplication) throws SQLException {
-	    Connection myConnection = null;
-	    PreparedStatement checkStatement = null;
-	    PreparedStatement myStatement = null;
-	    ResultSet resultSet = null;
+		Connection myConnection = null;
+		PreparedStatement checkStatement = null;
+		PreparedStatement myStatement = null;
+		ResultSet resultSet = null;
 
-	    try {
-	        myConnection = dataSource.getConnection();
+		try {
+			myConnection = dataSource.getConnection();
 
-	        // Check if a record with the same ApplicationName and UserName exists in UserDetails
-	        String checkSql = "SELECT * FROM UserDetails WHERE UserName = ?";
-	        checkStatement = myConnection.prepareStatement(checkSql);
-	        checkStatement.setString(1, NewApplication.getUserName());
-	        resultSet = checkStatement.executeQuery();
+			// Check if a record with the same ApplicationName and UserName exists in
+			// UserDetails
+			String checkSql = "SELECT * FROM UserDetails WHERE UserName = ?";
+			checkStatement = myConnection.prepareStatement(checkSql);
+			checkStatement.setString(1, NewApplication.getUserName());
+			resultSet = checkStatement.executeQuery();
 
-	        if (resultSet.next()) {
-	            // Perform date comparison validation
-	            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	            Date renewedDate = dateFormat.parse(NewApplication.getRenewed_Date());
-	            Date renewalDate = dateFormat.parse(NewApplication.getRenewal_Date());
+			if (resultSet.next()) {
+				// Perform date comparison validation
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				Date renewedDate = dateFormat.parse(NewApplication.getRenewed_Date());
+				Date renewalDate = dateFormat.parse(NewApplication.getRenewal_Date());
 
-	            if(renewalDate.after(renewedDate) || renewalDate.equals(renewedDate)) {
-	                // Check if a record with the same ApplicationName and UserName does not exist in ApplicationDetails
-	                String sql = "INSERT INTO ApplicationDetails (License_Id, ApplicationName, UserName, Renewed_Date, Renewal_Date) " +
-	                             "SELECT ?, ?, ?, ?, ? " +
-	                             "WHERE NOT EXISTS (SELECT * FROM ApplicationDetails " +
-	                             "WHERE (ApplicationName = ? AND UserName = ?) OR (License_Id = ? AND UserName = ?))";
+				if (renewalDate.after(renewedDate) || renewalDate.equals(renewedDate)) {
+					// Check if a record with the same ApplicationName and UserName does not exist
+					// in ApplicationDetails
+					String sql = "INSERT INTO ApplicationDetails (License_Id, ApplicationName, UserName, Renewed_Date, Renewal_Date) "
+							+ "SELECT ?, ?, ?, ?, ? " + "WHERE NOT EXISTS (SELECT * FROM ApplicationDetails "
+							+ "WHERE (ApplicationName = ? AND UserName = ?) OR (License_Id = ? AND UserName = ?))";
 
-	                myStatement = myConnection.prepareStatement(sql);
-	                myStatement.setString(1, NewApplication.getLicense_Id());
-	                myStatement.setString(2, NewApplication.getApplicationName());
-	                myStatement.setString(3, NewApplication.getUserName());
-	                myStatement.setString(4, NewApplication.getRenewed_Date());
-	                myStatement.setString(5, NewApplication.getRenewal_Date());
-	                myStatement.setString(6, NewApplication.getApplicationName());
-	                myStatement.setString(7, NewApplication.getUserName());
-	                myStatement.setString(8, NewApplication.getLicense_Id());
-	                myStatement.setString(9, NewApplication.getUserName());
+					myStatement = myConnection.prepareStatement(sql);
+					myStatement.setString(1, NewApplication.getLicense_Id());
+					myStatement.setString(2, NewApplication.getApplicationName());
+					myStatement.setString(3, NewApplication.getUserName());
+					myStatement.setString(4, NewApplication.getRenewed_Date());
+					myStatement.setString(5, NewApplication.getRenewal_Date());
+					myStatement.setString(6, NewApplication.getApplicationName());
+					myStatement.setString(7, NewApplication.getUserName());
+					myStatement.setString(8, NewApplication.getLicense_Id());
+					myStatement.setString(9, NewApplication.getUserName());
 
-	                myStatement.execute();
-	            } else {
-	                System.out.println("Renewal date must be greater than the renewed date.");
-	            }
-	        } else {
-	            throw new SQLException("Data for the user does not exist in the UserDetails table");
-	            
-	        }
-	    } catch (SQLException | ParseException e) {
-	        // Handle exceptions (log, provide user feedback, etc.)
-	        e.printStackTrace();
-	    } finally {
-	        close(myConnection, checkStatement, resultSet);
-	        close(null, myStatement, null);
-	    }
+					myStatement.execute();
+				} else {
+					System.out.println("Renewal date must be greater than the renewed date.");
+				}
+			} else {
+				throw new SQLException("Data for the user does not exist in the UserDetails table");
+
+			}
+		} catch (SQLException | ParseException e) {
+			// Handle exceptions (log, provide user feedback, etc.)
+			e.printStackTrace();
+		} finally {
+			close(myConnection, checkStatement, resultSet);
+			close(null, myStatement, null);
+		}
 	}
 
-	
+	public List<History> getHistoryData(String ApplicationName) throws SQLException {
+		List<History> historyData = new ArrayList<>();
+
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+
+		try {
+			String enteredapllicationName = ApplicationName;
+			// Establish a database connection (you should use your data source)
+			connection = dataSource.getConnection();
+
+			// Define your SQL query to fetch history data as a table
+			String sql = "SELECT License_Id, username, ApplicationName, Renewed_Date, Renewal_Date FROM historydetails where ApplicationName=?";
+			// preparedStatement = connection.prepareStatement(sql);
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, enteredapllicationName);
+			// Execute the query
+			resultSet = statement.executeQuery();
+
+			// Process the results
+			while (resultSet.next()) {
+				String applicationName = resultSet.getString("applicationname");
+				String username = resultSet.getString("username");
+				String licenseId = resultSet.getString("license_id");
+				String renewedDate = resultSet.getString("renewed_date");
+				String renewalDate = resultSet.getString("renewal_date");
+
+				History history = new History(applicationName, username, licenseId, renewedDate, renewalDate);
+
+				historyData.add(history);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			// Close database resources
+			if (resultSet != null) {
+				resultSet.close();
+			}
+			if (statement != null) {
+				statement.close();
+			}
+			if (connection != null) {
+				connection.close();
+			}
+		}
+
+		return historyData;
+	}
 
 	public List<History> getApplicationHistory(String userName, String license_Id, String applicationName)
 			throws SQLException {
@@ -137,8 +186,6 @@ public class UserDatabase {
 				String email = myRs.getString("Email");
 				String role = myRs.getString("Role");
 				String password = myRs.getString("Password");
-				
-				
 
 				Users tempUser = new Users(id, userName, firstName, lastName, email, role, password);
 
@@ -181,7 +228,8 @@ public class UserDatabase {
 		try {
 			String enteredusername = userName;
 			myConnection = dataSource.getConnection();
-			String sql = "SELECT * FROM ApplicationDetails WHERE Username = '" + enteredusername + "' ORDER BY ApplicationName";
+			String sql = "SELECT * FROM ApplicationDetails WHERE Username = '" + enteredusername
+					+ "' ORDER BY ApplicationName";
 			Statement statement = myConnection.createStatement();
 			myset = statement.executeQuery(sql);
 
@@ -232,48 +280,48 @@ public class UserDatabase {
 		}
 	}
 
-
 	public void ApplicationRenewalByUser(Application UpdatedLicense) throws SQLException {
-	    Connection myConnection = null;
-	    PreparedStatement myStatement = null;
+		Connection myConnection = null;
+		PreparedStatement myStatement = null;
 
-	    try {
-	        // Get a DB connection
-	        myConnection = dataSource.getConnection();
+		try {
+			// Get a DB connection
+			myConnection = dataSource.getConnection();
 
-	        // Perform date comparison validation in Java code
-	        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	       Date renewedDate = dateFormat.parse(UpdatedLicense.getRenewed_Date());
-	        Date renewalDate = dateFormat.parse(UpdatedLicense.getRenewal_Date());
-	     //  
-            if(renewalDate.after(renewedDate) || renewalDate.equals(renewedDate)) {
-	            // Create SQL update statement
-	            String sql = "UPDATE Applicationdetails SET License_Id = ?, UserName = ?, ApplicationName = ?, Renewed_Date = ?, Renewal_Date = ? WHERE License_Id = ?";
+			// Perform date comparison validation in Java code
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			Date renewedDate = dateFormat.parse(UpdatedLicense.getRenewed_Date());
+			Date renewalDate = dateFormat.parse(UpdatedLicense.getRenewal_Date());
+			//
+			if (renewalDate.after(renewedDate) || renewalDate.equals(renewedDate)) {
+				// Create SQL update statement
+				String sql = "UPDATE Applicationdetails SET License_Id = ?, UserName = ?, ApplicationName = ?, Renewed_Date = ?, Renewal_Date = ? WHERE License_Id = ?";
 
-	            // Prepare statement
-	            myStatement = myConnection.prepareStatement(sql);
+				// Prepare statement
+				myStatement = myConnection.prepareStatement(sql);
 
-	            // Set parameters
-	            myStatement.setString(1, UpdatedLicense.getLicense_Id());
-	            myStatement.setString(2, UpdatedLicense.getUserName());
-	            myStatement.setString(3, UpdatedLicense.getApplicationName());
-	            myStatement.setString(4, UpdatedLicense.getRenewed_Date());
-	            myStatement.setString(5, UpdatedLicense.getRenewal_Date());
-	            myStatement.setString(6, UpdatedLicense.getLicense_Id());
+				// Set parameters
+				myStatement.setString(1, UpdatedLicense.getLicense_Id());
+				myStatement.setString(2, UpdatedLicense.getUserName());
+				myStatement.setString(3, UpdatedLicense.getApplicationName());
+				myStatement.setString(4, UpdatedLicense.getRenewed_Date());
+				myStatement.setString(5, UpdatedLicense.getRenewal_Date());
+				myStatement.setString(6, UpdatedLicense.getLicense_Id());
 
-	            // Execute SQL statement
-	            myStatement.execute();
-	        } else {
-	            System.out.println("Renewal date must be greater than the renewed date.");
-	        }
-	    } catch (SQLException | ParseException e) {
-	        // Handle exceptions (log, provide user feedback, etc.)
-	        e.printStackTrace();
-	    } finally {
-	        // Clean up JDBC objects
-	        close(myConnection, myStatement, null);
-	    }
+				// Execute SQL statement
+				myStatement.execute();
+			} else {
+				System.out.println("Renewal date must be greater than the renewed date.");
+			}
+		} catch (SQLException | ParseException e) {
+			// Handle exceptions (log, provide user feedback, etc.)
+			e.printStackTrace();
+		} finally {
+			// Clean up JDBC objects
+			close(myConnection, myStatement, null);
+		}
 	}
+
 	public Application LoadDetailsForRenewal(String license_id, String username) throws Exception {
 		Application DetailsForLoad;
 		Connection myConnection = null;
@@ -392,7 +440,7 @@ public class UserDatabase {
 			myStmt.setString(4, UserList.getEmail());
 			myStmt.setString(5, UserList.getRole());
 			String Password = Argon.encrypt(UserList.getPassword());
-            myStmt.setString(6, Password);
+			myStmt.setString(6, Password);
 
 			myStmt.execute();
 		} finally {
@@ -477,11 +525,11 @@ public class UserDatabase {
 			while (resultSet.next()) {
 				String License_Id = resultSet.getString("License_Id");
 				String UserName = resultSet.getString("UserName");
-				String ApplicationName=resultSet.getString("ApplicationName");
+				String ApplicationName = resultSet.getString("ApplicationName");
 				String Renewed_Date = resultSet.getString("Renewed_Date");
 				String Renewal_Date = resultSet.getString("Renewal_Date");
 
-				History history = new History(License_Id, UserName,ApplicationName, Renewed_Date, Renewal_Date);
+				History history = new History(License_Id, UserName, ApplicationName, Renewed_Date, Renewal_Date);
 				historyOfApplication.add(history);
 			}
 			return historyOfApplication;
@@ -525,63 +573,62 @@ public class UserDatabase {
 		return null;
 	}
 
-	public List<History> GetHistoryOfIntervals(String start_Date, String end_Date,String applicationName) throws Exception {
+	public List<History> GetHistoryOfIntervals(String start_Date, String end_Date, String applicationName)
+			throws Exception {
 		List<History> IntervalOfDetails = new ArrayList<>();
 		Connection myConnection = null;
 		PreparedStatement preparedStatement = null;
 		ResultSet mySet = null;
 
 		try {
-		    String start_date = start_Date;
-		    String end_date = end_Date;
-		    String applicationname = applicationName;
-		    myConnection = dataSource.getConnection();
-		    String sql = "SELECT * FROM HistoryDetails WHERE ApplicationName=? AND Renewed_Date BETWEEN ? AND ?";
-		    preparedStatement = myConnection.prepareStatement(sql);
-		    preparedStatement.setString(1, applicationname);
-		    preparedStatement.setString(2, start_date);
-		    preparedStatement.setString(3, end_date);
+			String start_date = start_Date;
+			String end_date = end_Date;
+			String applicationname = applicationName;
+			myConnection = dataSource.getConnection();
+			String sql = "SELECT * FROM HistoryDetails WHERE ApplicationName=? AND Renewed_Date BETWEEN ? AND ?";
+			preparedStatement = myConnection.prepareStatement(sql);
+			preparedStatement.setString(1, applicationname);
+			preparedStatement.setString(2, start_date);
+			preparedStatement.setString(3, end_date);
 
-		    mySet = preparedStatement.executeQuery();
+			mySet = preparedStatement.executeQuery();
 
-		    while (mySet.next()) {
-		        String License_Id = mySet.getString("License_Id");
-		        String UserName = mySet.getString("UserName");
-		        String ApplicationName = mySet.getString("ApplicationName");
-		        String Renewed_Date = mySet.getString("Renewed_Date");
-		        String Renewal_Date = mySet.getString("Renewal_Date");
+			while (mySet.next()) {
+				String License_Id = mySet.getString("License_Id");
+				String UserName = mySet.getString("UserName");
+				String ApplicationName = mySet.getString("ApplicationName");
+				String Renewed_Date = mySet.getString("Renewed_Date");
+				String Renewal_Date = mySet.getString("Renewal_Date");
 
-		        History Details = new History(License_Id, UserName, ApplicationName, Renewed_Date, Renewal_Date);
-		        IntervalOfDetails.add(Details);
-		    }
-		    System.out.println("database" + IntervalOfDetails);
+				History Details = new History(License_Id, UserName, ApplicationName, Renewed_Date, Renewal_Date);
+				IntervalOfDetails.add(Details);
+			}
 
-		    return IntervalOfDetails;
+			return IntervalOfDetails;
 		} finally {
-		    close(myConnection, preparedStatement, mySet);
+			close(myConnection, preparedStatement, mySet);
 		}
 	}
+
 	public Map<String, String> DropDownForLicenseIdMap() throws SQLException {
-	    Map<String, String> licenseIdToAppNameMap = new HashMap<>();
-	    Connection myConnection = null;
-	    Statement myStatement = null;
-	    ResultSet mySet = null;
-	    try {
-	        myConnection = dataSource.getConnection();
-	        String sql = "SELECT License_Id, ApplicationName FROM applicationlist;";
-	        myStatement = myConnection.createStatement();
-	        mySet = myStatement.executeQuery(sql);
-	        while (mySet.next()) {
-	            String License_Id = mySet.getString("License_Id");
-	            String ApplicationName = mySet.getString("ApplicationName");
-	            licenseIdToAppNameMap.put(License_Id, ApplicationName);
-	        }
-	        System.out.println(licenseIdToAppNameMap);
-	        return licenseIdToAppNameMap;
-	    } finally {
-	        close(myConnection, myStatement, mySet);
-	    }
+		Map<String, String> licenseIdToAppNameMap = new HashMap<>();
+		Connection myConnection = null;
+		Statement myStatement = null;
+		ResultSet mySet = null;
+		try {
+			myConnection = dataSource.getConnection();
+			String sql = "SELECT License_Id, ApplicationName FROM applicationlist;";
+			myStatement = myConnection.createStatement();
+			mySet = myStatement.executeQuery(sql);
+			while (mySet.next()) {
+				String License_Id = mySet.getString("License_Id");
+				String ApplicationName = mySet.getString("ApplicationName");
+				licenseIdToAppNameMap.put(License_Id, ApplicationName);
+			}
+			System.out.println(licenseIdToAppNameMap);
+			return licenseIdToAppNameMap;
+		} finally {
+			close(myConnection, myStatement, mySet);
+		}
 	}
 }
-
-
