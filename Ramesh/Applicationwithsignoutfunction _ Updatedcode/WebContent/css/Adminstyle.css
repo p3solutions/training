@@ -1,0 +1,57 @@
+@charset "ISO-8859-1";
+.header {
+    background-color:  rgb(117, 206, 250);; /* You can use any shade of blue you prefer */
+    color: black; /* Set text color to white for better contrast */
+    padding: 5px;
+    overflow: hidden; 
+}
+
+.viewPort {
+    display: flex;
+    justify-content: space-between;
+}
+.image{
+	margin-top: 15px;
+    margin-left: 23px;
+}
+.topic{
+	 text-align: center;
+	 margin-top: 1px;
+}
+
+.right-content {
+    float: right;
+}
+
+.username {
+	float: left;
+    margin-top: 10px;
+}
+
+.logout-form {
+	float: left;
+    margin-top: 30px;
+    margin-right: 23px;
+}
+
+/* Table header styles */
+table th {
+    background-color: rgb(207, 235, 252);;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Table cell styles */
+td, tr, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center; /* Center content horizontally */
+    vertical-align: middle; /* Center content vertically */
+}
